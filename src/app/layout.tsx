@@ -5,7 +5,7 @@ import "./globals.css";
 import NavBar from "@/app/_components/_Navbar/NavBar";
 import "../../node_modules/@fortawesome/fontawesome-free/css/all.min.css"
 import NavContextProvider from "../../Context/NavContext";
-import toast, { Toaster } from 'react-hot-toast';
+import { Toaster } from '@/components/ui/sonner';
 import { CartItemsContextProvider } from "../../Context/CartItemsContext";
 import { IconsContextProvider } from "../../Context/IconsContext";
 import Footer from "./footer/page";

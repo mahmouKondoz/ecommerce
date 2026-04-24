@@ -4,14 +4,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { loginShema } from '@/Validation/login'
 import { zodResolver } from '@hookform/resolvers/zod'
-import axios from 'axios'
 import { useRouter } from 'next/navigation'
-
 import React, { useContext, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { IconsContext } from '../../../../Context/IconsContext'
-import { SignUpApi } from '../../../../Api/Auth/SignUp'
+
 
 export default function Login() {
 
@@ -20,14 +18,12 @@ export default function Login() {
   let router = useRouter()
 
   let nav = useContext(NavContext)
-  if(!nav){return null}
+  if (!nav) { return null }
   let { setIslogin } = nav
 
-
-
   let user = useContext(IconsContext)
-  if(!user){return null}
-  let{setUserData} = user
+  if (!user) { return null }
+  let { setUserData } = user
 
 
 
@@ -47,36 +43,44 @@ export default function Login() {
   let handelLogin = async (userData: object) => {
 
     try {
-
       setIsLoading(true)
-      let { data } = await SignUpApi(userData)
-      console.log(data);
-      setUserData(data?.user?.name)
 
-      localStorage.setItem('userToken', data.token)
-      setIslogin(localStorage.getItem('userToken'))
-      if (data.message == 'success') {
-        toast.success(`Welcome  ${data.user.name} 👋`)
-        router.push('/')
+      const response = await fetch('https://ecommerce.routemisr.com/api/v1/auth/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      })
 
+      const data = await response.json()
+
+      if (!response.ok) {
+        const serverMsg = data?.message || data?.msg || 'Login failed'
+        toast.error(typeof serverMsg === 'string' ? serverMsg : 'Login failed')
+        return
       }
 
-
+      setUserData(data?.user?.name)
+      localStorage.setItem('userToken', data.token)
+      localStorage.setItem('userData' , JSON.stringify(data.user.name))
+      setIslogin(localStorage.getItem('userToken'))
+      toast.success(`Welcome ${data.user.name} 👋`)
+      router.push('/')
 
     } catch (error) {
-      toast.error('Oops! The email or password you entered is incorrect.')
+      console.error(error)
+      toast.error('Network error — please try again')
 
-
-    }
-    finally {
+    } finally {
       setIsLoading(false)
     }
-
 
   }
 
   let { formState, handleSubmit, register, watch } = form
   let isTyping = watch('password')
+
   return <>
 
 
@@ -116,7 +120,7 @@ export default function Login() {
           {isloading ? <i className="fa-solid fa-spinner fa-spin"></i> : 'Login'}
 
         </Button>
-        <Button type='button' onClick={()=>{router.push('Register')}} className='cursor-pointer w-full  hover:scale-105  hover:shadow-2xl duration-500'>Create new account</Button>
+        <Button type='button' onClick={() => { router.push('Register') }} className='cursor-pointer w-full  hover:scale-105  hover:shadow-2xl duration-500'>Create new account</Button>
       </form>
     </div>
 

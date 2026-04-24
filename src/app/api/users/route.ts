@@ -1,23 +1,22 @@
 import { NextResponse } from "next/server"
 
-let dataBase = ['mahmoud','khadega','alla']
+let users = ['mahmnoud' , 'khadega' , 'alaa'] 
+
+export function GET(){
+
+    return NextResponse.json(users)
 
 
- export async function GET() {
-    
-    return NextResponse.json(dataBase)
 }
 
+export async function POST(res:Request){
 
-
-export let POST = async(req:Request)=>{
-
-    let body = await req.json() 
-    dataBase.push(body.name)
+    let body  = await res.json()
+    users.push(body.name)
     return NextResponse.json({
-       status:'success' , 
-       users:dataBase 
-        
+        status:'success' , 
+        users
     })
+
 
 }

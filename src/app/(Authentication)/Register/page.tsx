@@ -7,18 +7,17 @@ import { useForm } from 'react-hook-form'
 import { registerValidation } from '@/Validation/register';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { watch } from 'fs';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 
 
 export default function Register() {
-  
 
-  let [isloading , setIsLoading] = useState(false)
-  let [show , setShow] = useState(false)
-   let schema = registerValidation()
-   let router = useRouter()
+
+  let [isloading, setIsLoading] = useState(false)
+  let [show, setShow] = useState(false)
+  let schema = registerValidation()
+  let router = useRouter()
 
 
 
@@ -33,48 +32,59 @@ export default function Register() {
       email: '',
       password: '',
       rePassword: '',
-      phone: '' 
+      phone: ''
 
     },
-    resolver:zodResolver(schema),
-    mode:'onTouched' ,
-    
-  })
-     
-  
+    resolver: zodResolver(schema),
+    mode: 'onTouched',
 
-  let { register, handleSubmit , formState, watch } = form
+  })
+
+
+
+  let { register, handleSubmit, formState, watch } = form
   let isTyping = watch('password')
 
   let handelRegister = async (userData: object) => {
-    
+
 
     try {
       setIsLoading(true)
-      let {data}  = await axios.post('https://ecommerce.routemisr.com/api/v1/auth/signup',userData)
+      let { data } = await axios.post('https://ecommerce.routemisr.com/api/v1/auth/signup', userData)
 
-    console.log(data);
-    if(data.message == "success"){
-      toast.success("Successfully created!")
-      router.push('/Login')
-       
+      console.log(data);
+      if (data.message == "success") {
+        toast.success("Successfully created!")
+        router.push('/Login')
 
-    }
-    
-    
-      
-    } catch (error) {
+
+      }
+
+
+
+    } catch (error: unknown) {
       console.log(error);
-      
-      toast.error("User aready exist")
-      
-      
+
+      if (axios.isAxiosError(error)) {
+        const serverMessage = (error.response?.data as any)?.message ?? (error.response?.data as any)?.msg ?? ''
+        const text = typeof serverMessage === 'string' ? serverMessage : JSON.stringify(serverMessage)
+
+        if (error.response?.status === 409 || text.toLowerCase().includes('exist') || text.toLowerCase().includes('already')) {
+          toast.error('User already exists')
+          router.push('/Login')
+        } else {
+          toast.error('Registration failed')
+        }
+      } else {
+        toast.error('Registration failed')
+      }
+
     }
-    finally{
+    finally {
       setIsLoading(false)
     }
-    
-    
+
+
 
   }
 
@@ -90,17 +100,17 @@ export default function Register() {
 
           <Input
 
-           
+
             className="w-full my-3"
             placeholder="Enter your name"
             type="text"
             {...register('name')}
-            
+
           />
           {
-          formState.errors.name &&  <p className='text-sm font-bold text-red-700 text-center my-3'>{formState.errors.name.message}</p>
+            formState.errors.name && <p className='text-sm font-bold text-red-700 text-center my-3'>{formState.errors.name.message}</p>
           }
-         
+
 
           <Input
             className="w-full my-3"
@@ -108,20 +118,20 @@ export default function Register() {
             type="email"
             {...register('email')}
           />
-          {formState.errors.email &&  <p className='text-sm font-bold text-red-700 text-center my-3'>{formState.errors.email.message}</p>}
+          {formState.errors.email && <p className='text-sm font-bold text-red-700 text-center my-3'>{formState.errors.email.message}</p>}
 
-         <div className='relative'>
-           <Input
-          
-            className="w-full my-3"
-            placeholder="Enter your password"
-            type={show ? 'text' : 'password'}
-            {...register('password')}
-            
-          />
-          {isTyping && <i onClick={()=>{setShow(!show) }} className={`fa-solid cursor-pointer ${show ?'fa-eye' : 'fa-eye-slash'} absolute end-5 top-5`}></i>}
-         </div>
-          
+          <div className='relative'>
+            <Input
+
+              className="w-full my-3"
+              placeholder="Enter your password"
+              type={show ? 'text' : 'password'}
+              {...register('password')}
+
+            />
+            {isTyping && <i onClick={() => { setShow(!show) }} className={`fa-solid cursor-pointer ${show ? 'fa-eye' : 'fa-eye-slash'} absolute end-5 top-5`}></i>}
+          </div>
+
           {formState.errors.password && <p className='text-sm font-bold text-red-700 text-center my-3'>{formState.errors.password.message}</p>}
 
           <Input
@@ -130,7 +140,7 @@ export default function Register() {
             type="password"
             {...register('rePassword')}
           />
-           {formState.errors.rePassword && <p className='text-sm font-bold text-red-700 text-center my-3'>{formState.errors.rePassword.message}</p>}
+          {formState.errors.rePassword && <p className='text-sm font-bold text-red-700 text-center my-3'>{formState.errors.rePassword.message}</p>}
 
           <Input
             className="w-full my-3"
@@ -138,14 +148,14 @@ export default function Register() {
             type="number"
             {...register('phone')}
           />
-           {formState.errors.phone && <p className='text-sm font-bold text-red-700 text-center my-3'>{formState.errors.phone.message}</p>}
+          {formState.errors.phone && <p className='text-sm font-bold text-red-700 text-center my-3'>{formState.errors.phone.message}</p>}
 
-          <Button  className={`w-full my-5 bg-lime-400 text-white hover:bg-lime-500 hover:scale-105 cursor-pointer hover:shadow-2xl duration-500 ${isloading && 'cursor-not-allowed'}`}>
-           {isloading  ? <i className="fa-solid fa-spinner fa-spin"></i> : 'Register'}
+          <Button className={`w-full my-5 bg-lime-400 text-white hover:bg-lime-500 hover:scale-105 cursor-pointer hover:shadow-2xl duration-500 ${isloading && 'cursor-not-allowed'}`}>
+            {isloading ? <i className="fa-solid fa-spinner fa-spin"></i> : 'Register'}
           </Button>
-          <Button type='button' onClick={()=>{router.push('Login')}} className='cursor-pointer  w-full  hover:scale-105  hover:shadow-2xl duration-500'>i aready have an account</Button>
+          <Button type='button' onClick={() => { router.push('Login') }} className='cursor-pointer  w-full  hover:scale-105  hover:shadow-2xl duration-500'>i aready have an account</Button>
         </form>
-        
+
       </div>
     </>
   )
